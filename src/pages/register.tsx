@@ -1,33 +1,53 @@
-import { FormControl, FormLabel, Input } from '@chakra-ui/react';
+import { Box, Button } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import React from 'react';
+import { useMutation } from 'urql';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-
+import { useRegisterMutation } from '../generated/graphql';
+import { toErrorMap } from '../utils/toErrorMap';
+import { useRouter } from 'next/router';
 interface RegisterProps {
 
 };
 
 const RegisterPage: React.FC<RegisterProps> = () => {
+  const router = useRouter();
+  const [, register] = useRegisterMutation();
   return (
     <Wrapper variant="small">
       <Formik 
         initialValues={{username: "", password: ""}}
-        onSubmit={(values) => {console.log(values)}}>
-        {({values, handleChange}) => (
+        onSubmit={async (values, { setErrors }) => { 
+          const response = await register(values);
+          if(response.data?.register.errors){
+            setErrors(toErrorMap(response.data.register.errors));
+          } else if (response.data?.register.user) {
+            // register worked
+            router.push('/');
+          }
+        }}>
+        {({ isSubmitting }) => (
           <Form>
             <InputField 
               placeholder="username"
               name="username"
               label="Username"
               />
-            <InputField 
-              placeholder="password"
-              name="password"
-              label="Password"
-              type="password"
-              />
-              
+            <Box mt={4}>
+              <InputField 
+                placeholder="password"
+                name="password"
+                label="Password"
+                type="password"
+                />
+            </Box>
+            <Button 
+              mt={4}
+              type="submit"
+              isLoading={isSubmitting}
+              colorScheme="orange"
+              >Register</Button>
           </Form>
         )}
       </Formik>
