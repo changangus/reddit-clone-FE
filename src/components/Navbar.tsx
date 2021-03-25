@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Link } from '@chakra-ui/react';
 import React from 'react';
 import NextLink from 'next/link';
-import { useMeQuery } from '../generated/graphql';
+import { useLogoutMutation, useMeQuery } from '../generated/graphql';
 
 interface NavbarProps {
 
@@ -9,6 +9,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
     const [{data, fetching}, me] = useMeQuery();
+    const [, logout] =useLogoutMutation();
     let body = null;
     // data is loading
     if(fetching) {
@@ -31,7 +32,12 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
           <Box>
             {data.me.username}
           </Box>
-          <Button variant="link" ml={4}>Logout</Button>
+          <Button 
+            variant="link" 
+            ml={4}
+            onClick={() => {
+              logout();
+            }}>Logout</Button>
         </Flex>
       )
     }
